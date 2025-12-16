@@ -4,7 +4,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>我的 NFC AR 體驗</title>
+    <title>AR 直式影片體驗</title>
+
+    <script>
+      // 影片控制腳本：掃到播放，移開暫停
+      AFRAME.registerComponent('videohandler', {
+        init: function () {
+          var marker = this.el;
+          this.vid = document.querySelector("#vid");
+
+          marker.addEventListener('mindar-image-targetFound', function () {
+            this.vid.play();
+          }.bind(this));
+
+          marker.addEventListener('mindar-image-targetLost', function () {
+            this.vid.pause();
+          }.bind(this));
+        },
+      });
+    </script>
   </head>
   <body>
     <a-scene 
@@ -15,25 +33,31 @@
       device-orientation-permission-ui="enabled: false">
 
       <a-assets>
-        <a-asset-item id="avatarModel" src="./model.glb"></a-asset-item>
+        <video 
+          id="vid" 
+          src="./IRIS_OUT.mp4" 
+          preload="auto" 
+          response-type="arraybuffer" 
+          loop="true" 
+          crossorigin="anonymous" 
+          playsinline 
+          webkit-playsinline 
+          muted="true"> </video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <a-entity mindar-image-target="targetIndex: 0">
+      <a-entity mindar-image-target="targetIndex: 0" videohandler>
         
-        <a-gltf-model 
-          rotation="1 1 1" 
+        <a-video 
+          src="#vid" 
+          width="1" 
+          height="1.777" 
           position="0 0 0" 
-          scale="2000 2000 2000" 
-          src="#avatarModel" 
-          animation="property: position; to: 0 0.1 0; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate">
-        </a-gltf-model>
+          rotation="0 0 0">
+        </a-video>
         
       </a-entity>
     </a-scene>
   </body>
-
 </html>
-
-
