@@ -4,27 +4,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 直式影片體驗</title>
+    <title>AR 影片體驗 (點擊播放)</title>
+
+    <style>
+      /* 1. 播放按鈕的樣式設計 */
+      #overlay {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6); /* 半透明黑色背景 */
+        z-index: 999; /* 確保在最上層 */
+      }
+      #play-btn {
+        background: white;
+        border: none;
+        border-radius: 50%; /* 圓形 */
+        width: 80px;
+        height: 80px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* 繪製一個三角形圖示 */
+      #play-icon {
+        width: 0; 
+        height: 0; 
+        border-top: 15px solid transparent;
+        border-bottom: 15px solid transparent;
+        border-left: 25px solid #333;
+        margin-left: 5px; /* 稍微修正視覺中心 */
+      }
+      /* 隱藏預設的 "Loading..." 字樣，改用我們自己的按鈕 */
+      .mindar-ui-loading { display: none !important; }
+    </style>
 
     <script>
-      // 影片控制腳本：掃到播放，移開暫停
-      AFRAME.registerComponent('videohandler', {
-        init: function () {
-          var marker = this.el;
-          this.vid = document.querySelector("#vid");
+      document.addEventListener("DOMContentLoaded", function() {
+        const overlay = document.querySelector("#overlay");
+        const playBtn = document.querySelector("#play-btn");
+        const video = document.querySelector("#vid");
+        
+        // 紀錄使用者是否已經點擊過按鈕
+        let userClicked = false;
 
-          marker.addEventListener('mindar-image-targetFound', function () {
-            this.vid.play();
-          }.bind(this));
+        // 2. 點擊按鈕的事件處理
+        playBtn.addEventListener('click', () => {
+          // A. 隱藏遮罩與按鈕
+          overlay.style.display = 'none';
+          userClicked = true;
 
-          marker.addEventListener('mindar-image-targetLost', function () {
-            this.vid.pause();
-          }.bind(this));
-        },
+          // B. 關鍵步驟：解除 iOS 靜音限制
+          // 先播放一瞬間再暫停，這樣瀏覽器就會認定「使用者同意播放聲音」
+          video.muted = false; // 開啟聲音
+          video.play().then(() => {
+            video.pause();
+          }).catch((e) => {
+            console.log("播放權限取得失敗，可能需要再次點擊", e);
+          });
+        });
+
+        // 3. AR 偵測邏輯
+        AFRAME.registerComponent('videohandler', {
+          init: function () {
+            var marker = this.el;
+
+            // 當偵測到圖片時
+            marker.addEventListener('mindar-image-targetFound', function () {
+              // 只有當「使用者已經點過按鈕」時，才真正開始播放
+              if (userClicked) {
+                video.play();
+              }
+            }.bind(this));
+
+            // 當圖片消失時
+            marker.addEventListener('mindar-image-targetLost', function () {
+              video.pause();
+            }.bind(this));
+          },
+        });
       });
     </script>
   </head>
   <body>
+    <div id="overlay">
+      <button id="play-btn">
+        <div id="play-icon"></div>
+      </button>
+    </div>
+
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind;" 
       color-space="sRGB" 
@@ -41,14 +115,13 @@
           loop="true" 
           crossorigin="anonymous" 
           playsinline 
-          webkit-playsinline 
-          muted="true"> </video>
+          webkit-playsinline>
+        </video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0" videohandler>
-        
         <a-video 
           src="#vid" 
           width="1" 
@@ -56,7 +129,6 @@
           position="0 0 0" 
           rotation="0 0 0">
         </a-video>
-        
       </a-entity>
     </a-scene>
   </body>
