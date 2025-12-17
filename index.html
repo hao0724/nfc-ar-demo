@@ -4,21 +4,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 放大增強版</title>
+    <title>AR 最終調整版</title>
 
     <script>
       document.addEventListener("DOMContentLoaded", function() {
         const video = document.querySelector("#vid");
 
-        // --- 點擊畫面開聲音 ---
+        // --- 點擊畫面邏輯 ---
         AFRAME.registerComponent('play-on-click', {
           init: function () {
             this.el.addEventListener('click', () => {
-              // 點擊後解除靜音
+              // 點擊後解除靜音並播放/暫停
               video.muted = false;
-              // 如果暫停中就播放，播放中就沒反應(保持播放)
-              if(video.paused) { 
-                  video.play(); 
+              if (video.paused) {
+                video.play();
+              } else {
+                video.pause();
               }
             });
           },
@@ -29,9 +30,9 @@
           init: function () {
             var marker = this.el;
             
-            // 掃到圖：播放影片 (靜音狀態)
+            // 掃到圖：暫不做動作，等待用戶點擊 (或您可以改成 video.play() 自動播)
             marker.addEventListener('mindar-image-targetFound', function () {
-              video.play();
+              // 保持影片暫停，顯示第一格畫面
             }.bind(this));
             
             // 圖消失：暫停影片
@@ -60,7 +61,6 @@
           crossorigin="anonymous" 
           playsinline 
           webkit-playsinline
-          autoplay="true"
           muted="true">
         </video>
         
@@ -88,8 +88,8 @@
         
         <a-gltf-model 
           src="#logo-model" 
-          position="0 0 0.5" 
-          scale="0.5 0.5 0.5"
+          position="-0.5 -0.5 0.5" 
+          scale="0.1 0.1 0.1"
           rotation="0 0 0">
         </a-gltf-model>
 
