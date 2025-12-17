@@ -4,40 +4,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 極簡展示 (點擊影片播放)</title>
+    <title>AR 放大增強版</title>
 
     <script>
       document.addEventListener("DOMContentLoaded", function() {
         const video = document.querySelector("#vid");
 
-        // --- 1. 點擊影片的邏輯 ---
+        // --- 點擊畫面開聲音 ---
         AFRAME.registerComponent('play-on-click', {
           init: function () {
-            // 這次我們監聽的是「影片」自己
             this.el.addEventListener('click', () => {
-              if (video.paused) {
-                video.muted = false;
-                video.play();
-              } else {
-                video.pause(); // 再次點擊可以暫停
+              // 點擊後解除靜音
+              video.muted = false;
+              // 如果暫停中就播放，播放中就沒反應(保持播放)
+              if(video.paused) { 
+                  video.play(); 
               }
             });
           },
         });
 
-        // --- 2. AR 追蹤邏輯 ---
+        // --- AR 追蹤邏輯 ---
         AFRAME.registerComponent('videohandler', {
           init: function () {
             var marker = this.el;
             
-            // 圖片消失時 -> 暫停影片
-            marker.addEventListener('mindar-image-targetLost', function () {
-              video.pause();
+            // 掃到圖：播放影片 (靜音狀態)
+            marker.addEventListener('mindar-image-targetFound', function () {
+              video.play();
             }.bind(this));
             
-            // 圖片出現時 -> 這裡不自動播，交給用戶點擊影片
-            marker.addEventListener('mindar-image-targetFound', function () {
-              // 保持現狀，等待點擊
+            // 圖消失：暫停影片
+            marker.addEventListener('mindar-image-targetLost', function () {
+              video.pause();
             }.bind(this));
           },
         });
@@ -61,7 +60,8 @@
           crossorigin="anonymous" 
           playsinline 
           webkit-playsinline
-          muted>
+          autoplay="true"
+          muted="true">
         </video>
         
         <a-asset-item id="logo-model" src="./logo.glb"></a-asset-item>
@@ -78,8 +78,8 @@
         
         <a-video 
           src="#vid" 
-          width="1" 
-          height="0.5625" 
+          width="2" 
+          height="1.125" 
           position="0 0 0"
           material="shader: flat;"
           class="clickable"
@@ -88,8 +88,8 @@
         
         <a-gltf-model 
           src="#logo-model" 
-          position="0 0 0.3" 
-          scale="0.3 0.3 0.3"
+          position="0 0 0.5" 
+          scale="0.5 0.5 0.5"
           rotation="0 0 0">
         </a-gltf-model>
 
