@@ -4,14 +4,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR Logo 展示</title>
+    <title>AR Logo + 兔寶寶展示</title>
 
     <script>
       document.addEventListener("DOMContentLoaded", function() {
         const video = document.querySelector("#vid");
         const playButton = document.querySelector("#play-button");
 
-        // --- 點擊按鈕的邏輯 ---
+        // --- 點擊按鈕邏輯 ---
         AFRAME.registerComponent('play-on-click', {
           init: function () {
             this.el.addEventListener('click', () => {
@@ -22,7 +22,7 @@
           },
         });
 
-        // --- 追蹤目標的邏輯 ---
+        // --- AR 追蹤邏輯 ---
         AFRAME.registerComponent('videohandler', {
           init: function () {
             var marker = this.el;
@@ -51,7 +51,7 @@
       <a-assets>
         <video 
           id="vid" 
-          src="./video.mp4" 
+          src="https://cdn.aframe.io/videos/bunny.mp4" 
           preload="auto" 
           loop="true" 
           crossorigin="anonymous" 
@@ -69,23 +69,24 @@
         <a-entity cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-entity>
       </a-camera>
 
-      <a-light type="ambient" intensity="1"></a-light>
-      <a-light type="directional" position="1 1 1" intensity="1.5"></a-light>
+      <a-light type="ambient" intensity="2"></a-light>
+      <a-light type="directional" position="1 2 1" intensity="3"></a-light>
 
       <a-entity mindar-image-target="targetIndex: 0" videohandler>
         
         <a-video 
           src="#vid" 
           width="1" 
-          height="1.777" 
-          position="0 0 0">
+          height="0.5625" 
+          position="0 -0.5 0"
+          material="shader: flat;">
         </a-video>
         
         <a-image
           id="play-button"
           src="#icon-play"
-          position="0 0 0.05"
-          scale="0.3 0.3 0.3"
+          position="0 -0.5 0.05"
+          scale="0.2 0.2 0.2"
           class="clickable"
           play-on-click
           visible="true">
@@ -93,10 +94,9 @@
 
         <a-gltf-model 
           src="#logo-model" 
-          position="0 1.2 0.3" 
-          scale="0.5 0.5 0.5"
-          rotation="0 0 0"
-          animation="property: rotation; to: 0 360 0; dur: 4000; easing: linear; loop: true">
+          position="0 0.5 0.3" 
+          scale="0.3 0.3 0.3"
+          rotation="0 0 0">
         </a-gltf-model>
 
       </a-entity>
