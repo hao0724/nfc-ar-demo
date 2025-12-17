@@ -4,49 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 影片體驗</title>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        const video = document.querySelector("#vid");
-        const playButton = document.querySelector("#play-button");
-
-        // --- 1. 點擊按鈕的邏輯 ---
-        AFRAME.registerComponent('play-on-click', {
-          init: function () {
-            this.el.addEventListener('click', () => {
-              // 隱藏按鈕
-              playButton.setAttribute('visible', false);
-              // 開啟聲音並播放
-              video.muted = false;
-              video.play();
-            });
-          },
-        });
-
-        // --- 2. 追蹤目標的邏輯 ---
-        AFRAME.registerComponent('videohandler', {
-          init: function () {
-            var marker = this.el;
-
-            // 找到圖片時
-            marker.addEventListener('mindar-image-targetFound', function () {
-              // 如果影片沒在播，就顯示按鈕讓人點
-              if (video.paused) {
-                playButton.setAttribute('visible', true);
-              }
-            }.bind(this));
-
-            // 圖片消失時
-            marker.addEventListener('mindar-image-targetLost', function () {
-              video.pause();
-              // 重新顯示按鈕，下次掃描可以再點
-              playButton.setAttribute('visible', true);
-            }.bind(this));
-          },
-        });
-      });
-    </script>
+    <title>AR 雙重測試 (影片+方塊)</title>
   </head>
   <body>
     <a-scene 
@@ -58,44 +16,38 @@
 
       <a-assets>
         <video 
-          id="vid" 
-          src="./IRIS_OUT.mp4" 
+          id="bunny-video" 
+          src="https://cdn.aframe.io/videos/bunny.mp4" 
           preload="auto" 
           loop="true" 
           crossorigin="anonymous" 
           playsinline 
-          webkit-playsinline
-          muted>
+          webkit-playsinline 
+          autoplay="true"
+          muted="true">
         </video>
-
-        <img id="icon-play" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEeSURBVHhe7Zc7DsIwEIVJiZKSEiA6Gho6Cq6EKhQ0lFyAkyA6GjokCgokBR0F78mQeCyF2Fm7H18kK0WkF/t540TsnYg4jpd1t91IkmT6+Xw2k9uN/j4d92f7cQYvX/v+9Hn9fr0iH3s61sM/jW961W6X6fVl249393wM8V338eY+vHjT16fN4z9qD3s5loN/Gt8539T/B6DAa74LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmv4B+AbE5A23p/zT9AAAAAElFTkSuQmCC" />
       </a-assets>
 
-      <a-camera position="0 0 0" look-controls="enabled: false">
-        <a-entity cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-entity>
-      </a-camera>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <a-entity mindar-image-target="targetIndex: 0" videohandler>
-        <a-box color="red" position="0 0 0" scale="0.5 0.5 0.5"></a-box>
-        <a-video 
-          src="#vid" 
-          width="1" 
-          height="1.777" 
-          position="0 0 0">
-        </a-video>
+      <a-entity mindar-image-target="targetIndex: 0">
         
-        <a-image
-          id="play-button"
-          src="#icon-play"
-          position="0 0 0.02"
-          scale="0.3 0.3 0.3"
-          class="clickable"
-          play-on-click
-          visible="true">
-        </a-image>
+        <a-video 
+          src="#bunny-video" 
+          width="1" 
+          height="0.5625" 
+          position="0 0.4 0" 
+          rotation="0 0 0">
+        </a-video>
 
+        <a-box 
+          color="red" 
+          position="0 -0.4 0" 
+          scale="0.3 0.3 0.3"
+          animation="property: rotation; to: 0 360 0; dur: 2000; easing: linear; loop: true">
+        </a-box>
+        
       </a-entity>
     </a-scene>
   </body>
 </html>
-
