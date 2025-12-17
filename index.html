@@ -4,7 +4,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 紅色方塊測試</title>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.4.0/dist/aframe-extras.min.js"></script>
+    
+    <title>AR 音樂盒體驗</title>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        // --- 註冊互動元件 ---
+        AFRAME.registerComponent('music-box-control', {
+          init: function () {
+            const model = this.el; // 抓到 3D 模型
+            const sound = document.querySelector("#bgm"); // 抓到音樂
+            let isOpened = false; // 紀錄是否已經開過了
+
+            // 監聽點擊事件
+            model.addEventListener('click', () => {
+              
+              if (isOpened) return; // 如果已經開過，就不要再動作了
+
+              console.log("音樂盒被點擊！啟動...");
+
+              // 1. 播放音樂
+              sound.volume = 1.0;
+              sound.play();
+
+              // 2. 播放動畫
+              // 我們動態加入 animation-mixer 屬性
+              // clip: * -> 播放模型內所有的動畫片段
+              // loop: once -> 只播一次，不要重複開關
+              // clampWhenFinished: true -> 播完後停在最後一格（開著的狀態），不要彈回去
+              model.setAttribute('animation-mixer', {
+                clip: '*',
+                loop: 'once',
+                clampWhenFinished: true
+              });
+
+              isOpened = true; // 標記為已打開
+            });
+          }
+        });
+      });
+    </script>
   </head>
   <body>
     <a-scene 
@@ -14,18 +54,30 @@
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-assets>
+        <audio id="bgm" src="./reva.mp3" preload="auto"></audio>
+        
+        <a-asset-item id="box-model" src="./ring_box_animation.glb"></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false">
+        <a-entity cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-entity>
+      </a-camera>
+
+      <a-light type="ambient" intensity="1"></a-light>
+      <a-light type="directional" position="2 2 2" intensity="2"></a-light>
 
       <a-entity mindar-image-target="targetIndex: 0">
         
-        <a-box 
-          color="red" 
+        <a-gltf-model 
+          src="#box-model" 
           position="0 0 0" 
-          scale="0.5 0.5 0.5"
+          scale="0.5 0.5 0.5" 
           rotation="0 0 0"
-          animation="property: rotation; to: 0 360 0; dur: 2000; easing: linear; loop: true">
-        </a-box>
-        
+          class="clickable"
+          music-box-control>
+        </a-gltf-model>
+
       </a-entity>
     </a-scene>
   </body>
