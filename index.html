@@ -4,51 +4,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 影片體驗 (AR內點擊播放)</title>
+    <title>AR 影片體驗</title>
 
     <script>
       document.addEventListener("DOMContentLoaded", function() {
         const video = document.querySelector("#vid");
-        const playButtonEntity = document.querySelector("#play-button-entity");
+        const playButton = document.querySelector("#play-button");
 
-        // --- 元件 1: 處理 3D 按鈕點擊 ---
+        // --- 1. 點擊按鈕的邏輯 ---
         AFRAME.registerComponent('play-on-click', {
           init: function () {
-            // 監聽這個 3D 物件被「點擊」的事件
             this.el.addEventListener('click', () => {
-              console.log("3D按鈕被點擊，開始播放");
-              
-              // 1. 隱藏播放按鈕
-              playButtonEntity.setAttribute('visible', false);
-
-              // 2. 關鍵：解鎖 iOS 聲音並播放
-              video.muted = false; // 開啟聲音
+              // 隱藏按鈕
+              playButton.setAttribute('visible', false);
+              // 開啟聲音並播放
+              video.muted = false;
               video.play();
             });
           },
         });
 
-        // --- 元件 2: 處理 AR 追蹤狀態 ---
+        // --- 2. 追蹤目標的邏輯 ---
         AFRAME.registerComponent('videohandler', {
           init: function () {
             var marker = this.el;
 
-            // 當偵測到圖片時
+            // 找到圖片時
             marker.addEventListener('mindar-image-targetFound', function () {
-              console.log("目標找到");
-              // 如果影片目前是暫停的，確保顯示播放按鈕，讓用戶去點
+              // 如果影片沒在播，就顯示按鈕讓人點
               if (video.paused) {
-                playButtonEntity.setAttribute('visible', true);
+                playButton.setAttribute('visible', true);
               }
             }.bind(this));
 
-            // 當圖片消失時
+            // 圖片消失時
             marker.addEventListener('mindar-image-targetLost', function () {
-              console.log("目標丟失");
-              // 暫停影片
               video.pause();
-              // 重新顯示按鈕，這樣下次掃描時可以再點一次
-              playButtonEntity.setAttribute('visible', true);
+              // 重新顯示按鈕，下次掃描可以再點
+              playButton.setAttribute('visible', true);
             }.bind(this));
           },
         });
@@ -75,7 +68,7 @@
           muted>
         </video>
 
-        <img id="play-icon-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEeSURBVHhe7Zc7DsIwEIVJiZKSEiA6Gho6Cq6EKhQ0lFyAkyA6GjokCgokBR0F78mQeCyF2Fm7H18kK0WkF/t540TsnYg4jpd1t91IkmT6+Xw2k9uN/j4d92f7cQYvX/v+9Hn9fr0iH3s61sM/jW961W6X6fVl249393wM8V338eY+vHjT16fN4z9qD3s5loN/Gt8539T/B6DAa74LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmv4B+AbE5A23p/zT9AAAAAElFTkSuQmCC" />
+        <img id="icon-play" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEeSURBVHhe7Zc7DsIwEIVJiZKSEiA6Gho6Cq6EKhQ0lFyAkyA6GjokCgokBR0F78mQeCyF2Fm7H18kK0WkF/t540TsnYg4jpd1t91IkmT6+Xw2k9uN/j4d92f7cQYvX/v+9Hn9fr0iH3s61sM/jW961W6X6fVl249393wM8V338eY+vHjT16fN4z9qD3s5loN/Gt8539T/B6DAa74LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmv4B+AbE5A23p/zT9AAAAAElFTkSuQmCC" />
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false">
@@ -83,7 +76,7 @@
       </a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0" videohandler>
-        <a-box color="red" position="0 0 0" scale="0.5 0.5 0.5"></a-box>
+        
         <a-video 
           src="#vid" 
           width="1" 
@@ -92,16 +85,16 @@
         </a-video>
         
         <a-image
-          id="play-button-entity"
-          src="#play-icon-img"
-          position="0 0 0.01"
+          id="play-button"
+          src="#icon-play"
+          position="0 0 0.02"
           scale="0.3 0.3 0.3"
           class="clickable"
-          play-on-click>
+          play-on-click
+          visible="true">
         </a-image>
 
       </a-entity>
     </a-scene>
   </body>
 </html>
-
