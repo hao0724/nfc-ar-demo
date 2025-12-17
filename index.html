@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 紅色方塊測試</title>
+    <title>AR 方塊與模型展示</title>
   </head>
   <body>
     <a-scene 
@@ -14,17 +14,30 @@
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
 
+      <a-assets>
+        <a-asset-item id="reva-model" src="./reva.glb"></a-asset-item>
+      </a-assets>
+
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-light type="ambient" intensity="1"></a-light>
+      <a-light type="directional" position="1 1 1" intensity="2"></a-light>
 
       <a-entity mindar-image-target="targetIndex: 0">
         
         <a-box 
           color="red" 
-          position="0 0 0" 
-          scale="0.5 0.5 0.5"
-          rotation="0 0 0"
+          position="-0.4 0 0" 
+          scale="0.3 0.3 0.3"
           animation="property: rotation; to: 0 360 0; dur: 2000; easing: linear; loop: true">
         </a-box>
+
+        <a-gltf-model 
+          src="#reva-model" 
+          position="0.4 0 0" 
+          scale="0.3 0.3 0.3" 
+          rotation="0 0 0">
+        </a-gltf-model>
         
       </a-entity>
     </a-scene>
