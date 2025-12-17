@@ -4,95 +4,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 最終調整版</title>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        const video = document.querySelector("#vid");
-
-        // --- 點擊畫面邏輯 ---
-        AFRAME.registerComponent('play-on-click', {
-          init: function () {
-            this.el.addEventListener('click', () => {
-              // 點擊後解除靜音並播放/暫停
-              video.muted = false;
-              if (video.paused) {
-                video.play();
-              } else {
-                video.pause();
-              }
-            });
-          },
-        });
-
-        // --- AR 追蹤邏輯 ---
-        AFRAME.registerComponent('videohandler', {
-          init: function () {
-            var marker = this.el;
-            
-            // 掃到圖：暫不做動作，等待用戶點擊 (或您可以改成 video.play() 自動播)
-            marker.addEventListener('mindar-image-targetFound', function () {
-              // 保持影片暫停，顯示第一格畫面
-            }.bind(this));
-            
-            // 圖消失：暫停影片
-            marker.addEventListener('mindar-image-targetLost', function () {
-              video.pause();
-            }.bind(this));
-          },
-        });
-      });
-    </script>
+    <title>AR 紅色方塊測試</title>
   </head>
   <body>
     <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001; warmupTolerance: 5;" 
+      mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001;" 
       color-space="sRGB" 
       renderer="colorManagement: true, physicallyCorrectLights" 
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
 
-      <a-assets>
-        <video 
-          id="vid" 
-          src="https://cdn.aframe.io/videos/bunny.mp4" 
-          preload="auto" 
-          loop="true" 
-          crossorigin="anonymous" 
-          playsinline 
-          webkit-playsinline
-          muted="true">
-        </video>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0">
         
-        <a-asset-item id="logo-model" src="./logo.glb"></a-asset-item>
-      </a-assets>
-
-      <a-camera position="0 0 0" look-controls="enabled: false">
-        <a-entity cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-entity>
-      </a-camera>
-
-      <a-light type="ambient" intensity="2"></a-light>
-      <a-light type="directional" position="1 2 1" intensity="3"></a-light>
-
-      <a-entity mindar-image-target="targetIndex: 0" videohandler>
+        <a-box 
+          color="red" 
+          position="0 0 0" 
+          scale="0.5 0.5 0.5"
+          rotation="0 0 0"
+          animation="property: rotation; to: 0 360 0; dur: 2000; easing: linear; loop: true">
+        </a-box>
         
-        <a-video 
-          src="#vid" 
-          width="2" 
-          height="1.125" 
-          position="0 0 0"
-          material="shader: flat;"
-          class="clickable"
-          play-on-click>
-        </a-video>
-        
-        <a-gltf-model 
-          src="#logo-model" 
-          position="-0.5 -0.5 0.5" 
-          scale="0.1 0.1 0.1"
-          rotation="0 0 0">
-        </a-gltf-model>
-
       </a-entity>
     </a-scene>
   </body>
