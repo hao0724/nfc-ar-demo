@@ -4,11 +4,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 雙重測試 (影片+方塊)</title>
+    <title>AR 防抖測試</title>
   </head>
   <body>
     <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind;" 
+      mindar-image="imageTargetSrc: ./targets.mind; filterMinCF:0.0001; filterBeta: 0.001; warmupTolerance: 5;" 
       color-space="sRGB" 
       renderer="colorManagement: true, physicallyCorrectLights" 
       vr-mode-ui="enabled: false" 
@@ -36,8 +36,7 @@
           src="#bunny-video" 
           width="1" 
           height="0.5625" 
-          position="0 0.4 0" 
-          rotation="0 0 0">
+          position="0 0.4 0">
         </a-video>
 
         <a-box 
