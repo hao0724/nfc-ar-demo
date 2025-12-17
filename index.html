@@ -4,88 +4,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <title>AR 影片體驗 (點擊播放)</title>
-
-    <style>
-      /* 1. 播放按鈕的樣式設計 */
-      #overlay {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6); /* 半透明黑色背景 */
-        z-index: 999; /* 確保在最上層 */
-      }
-      #play-btn {
-        background: white;
-        border: none;
-        border-radius: 50%; /* 圓形 */
-        width: 80px;
-        height: 80px;
-        cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      /* 繪製一個三角形圖示 */
-      #play-icon {
-        width: 0; 
-        height: 0; 
-        border-top: 15px solid transparent;
-        border-bottom: 15px solid transparent;
-        border-left: 25px solid #333;
-        margin-left: 5px; /* 稍微修正視覺中心 */
-      }
-      /* 隱藏預設的 "Loading..." 字樣，改用我們自己的按鈕 */
-      .mindar-ui-loading { display: none !important; }
-    </style>
+    <title>AR 影片體驗 (AR內點擊播放)</title>
 
     <script>
       document.addEventListener("DOMContentLoaded", function() {
-        const overlay = document.querySelector("#overlay");
-        const playBtn = document.querySelector("#play-btn");
         const video = document.querySelector("#vid");
-        
-        // 紀錄使用者是否已經點擊過按鈕
-        let userClicked = false;
+        const playButtonEntity = document.querySelector("#play-button-entity");
 
-        // 2. 點擊按鈕的事件處理
-        playBtn.addEventListener('click', () => {
-          // A. 隱藏遮罩與按鈕
-          overlay.style.display = 'none';
-          userClicked = true;
+        // --- 元件 1: 處理 3D 按鈕點擊 ---
+        AFRAME.registerComponent('play-on-click', {
+          init: function () {
+            // 監聽這個 3D 物件被「點擊」的事件
+            this.el.addEventListener('click', () => {
+              console.log("3D按鈕被點擊，開始播放");
+              
+              // 1. 隱藏播放按鈕
+              playButtonEntity.setAttribute('visible', false);
 
-          // B. 關鍵步驟：解除 iOS 靜音限制
-          // 先播放一瞬間再暫停，這樣瀏覽器就會認定「使用者同意播放聲音」
-          video.muted = false; // 開啟聲音
-          video.play().then(() => {
-            video.pause();
-          }).catch((e) => {
-            console.log("播放權限取得失敗，可能需要再次點擊", e);
-          });
+              // 2. 關鍵：解鎖 iOS 聲音並播放
+              video.muted = false; // 開啟聲音
+              video.play();
+            });
+          },
         });
 
-        // 3. AR 偵測邏輯
+        // --- 元件 2: 處理 AR 追蹤狀態 ---
         AFRAME.registerComponent('videohandler', {
           init: function () {
             var marker = this.el;
 
             // 當偵測到圖片時
             marker.addEventListener('mindar-image-targetFound', function () {
-              // 只有當「使用者已經點過按鈕」時，才真正開始播放
-              if (userClicked) {
-                video.play();
+              console.log("目標找到");
+              // 如果影片目前是暫停的，確保顯示播放按鈕，讓用戶去點
+              if (video.paused) {
+                playButtonEntity.setAttribute('visible', true);
               }
             }.bind(this));
 
             // 當圖片消失時
             marker.addEventListener('mindar-image-targetLost', function () {
+              console.log("目標丟失");
+              // 暫停影片
               video.pause();
+              // 重新顯示按鈕，這樣下次掃描時可以再點一次
+              playButtonEntity.setAttribute('visible', true);
             }.bind(this));
           },
         });
@@ -93,12 +56,6 @@
     </script>
   </head>
   <body>
-    <div id="overlay">
-      <button id="play-btn">
-        <div id="play-icon"></div>
-      </button>
-    </div>
-
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind;" 
       color-space="sRGB" 
@@ -111,24 +68,38 @@
           id="vid" 
           src="./IRIS_OUT.mp4" 
           preload="auto" 
-          response-type="arraybuffer" 
           loop="true" 
           crossorigin="anonymous" 
           playsinline 
-          webkit-playsinline>
+          webkit-playsinline
+          muted>
         </video>
+
+        <img id="play-icon-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEeSURBVHhe7Zc7DsIwEIVJiZKSEiA6Gho6Cq6EKhQ0lFyAkyA6GjokCgokBR0F78mQeCyF2Fm7H18kK0WkF/t540TsnYg4jpd1t91IkmT6+Xw2k9uN/j4d92f7cQYvX/v+9Hn9fr0iH3s61sM/jW961W6X6fVl249393wM8V338eY+vHjT16fN4z9qD3s5loN/Gt8539T/B6DAa74LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmuwCg+S4AaL4LAJrvAoDmv4B+AbE5A23p/zT9AAAAAElFTkSuQmCC" />
       </a-assets>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-camera position="0 0 0" look-controls="enabled: false">
+        <a-entity cursor="fuse: false; rayOrigin: mouse;" raycaster="objects: .clickable"></a-entity>
+      </a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0" videohandler>
+        
         <a-video 
           src="#vid" 
           width="1" 
           height="1.777" 
-          position="0 0 0" 
-          rotation="0 0 0">
+          position="0 0 0">
         </a-video>
+        
+        <a-image
+          id="play-button-entity"
+          src="#play-icon-img"
+          position="0 0 0.01"
+          scale="0.3 0.3 0.3"
+          class="clickable"
+          play-on-click>
+        </a-image>
+
       </a-entity>
     </a-scene>
   </body>
